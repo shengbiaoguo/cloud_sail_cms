@@ -4,135 +4,190 @@ import {
   NotificationOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
-import { Card, Col, List, Row, Space, Statistic, Table, Tag } from 'antd';
+import { Card, Col, Empty, List, Row, Space, Spin, Statistic, Table, Tag } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useEffect, useMemo, useState } from 'react';
+import { dashboardApi } from '@/api/modules/dashboard';
 import { PageSection } from '@/components/common/page-section';
+import { StatusTag } from '@/components/common/status-tag';
+import type {
+  DashboardLatestContent,
+  DashboardLatestLead,
+  DashboardOverview,
+} from '@/types/dashboard';
 import { formatDateTime } from '@/utils/format';
 
-const stats = [
-  { title: '新闻总数', value: 24, icon: <NotificationOutlined /> },
-  { title: '案例总数', value: 12, icon: <FileDoneOutlined /> },
-  { title: '服务总数', value: 8, icon: <BarChartOutlined /> },
-  { title: '线索总数', value: 57, icon: <TeamOutlined /> },
-];
+const initialOverview: DashboardOverview = {
+  stats: {
+    newsCount: 0,
+    caseStudyCount: 0,
+    serviceCount: 0,
+    leadCount: 0,
+  },
+  latestLeads: [],
+  latestContents: [],
+};
 
-const recentLeads = [
-  {
-    id: 1001,
-    name: '张先生',
-    company: '星航科技',
-    status: 'pending',
-    createdAt: '2026-04-20 10:30',
-  },
-  {
-    id: 1002,
-    name: '王女士',
-    company: '云数智',
-    status: 'contacted',
-    createdAt: '2026-04-20 09:20',
-  },
-  {
-    id: 1003,
-    name: '陈先生',
-    company: '启帆集团',
-    status: 'converted',
-    createdAt: '2026-04-19 18:10',
-  },
-];
+const leadStatusColorMap: Record<DashboardLatestLead['status'], string> = {
+  pending: 'processing',
+  contacted: 'blue',
+  converted: 'success',
+  invalid: 'error',
+};
 
-const recentContents = [
-  {
-    id: 1,
-    title: '企业官网升级发布',
-    type: '新闻',
-    status: '已发布',
-    updatedAt: '2026-04-20 15:00',
-  },
-  {
-    id: 2,
-    title: '制造业数字化案例',
-    type: '案例',
-    status: '草稿',
-    updatedAt: '2026-04-20 12:30',
-  },
-  {
-    id: 3,
-    title: '品牌咨询服务',
-    type: '服务',
-    status: '已发布',
-    updatedAt: '2026-04-19 17:15',
-  },
-];
+const leadStatusLabelMap: Record<DashboardLatestLead['status'], string> = {
+  pending: '待处理',
+  contacted: '已联系',
+  converted: '已转化',
+  invalid: '无效',
+};
+
+const contentTypeLabelMap: Record<DashboardLatestContent['type'], string> = {
+  news: '新闻',
+  case: '案例',
+  service: '服务',
+};
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(false);
+  const [overview, setOverview] = useState<DashboardOverview>(initialOverview);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadOverview = async () => {
+      setLoading(true);
+      try {
+        const result = await dashboardApi.getOverview();
+        if (isMounted) {
+          setOverview(result);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadOverview().catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const statCards = useMemo(
+    () => [
+      {
+        title: '新闻总数',
+        value: overview.stats.newsCount,
+        icon: <NotificationOutlined />,
+      },
+      {
+        title: '案例总数',
+        value: overview.stats.caseStudyCount,
+        icon: <FileDoneOutlined />,
+      },
+      {
+        title: '服务总数',
+        value: overview.stats.serviceCount,
+        icon: <BarChartOutlined />,
+      },
+      { title: '线索总数', value: overview.stats.leadCount, icon: <TeamOutlined /> },
+    ],
+    [overview.stats],
+  );
+
+  const contentColumns: ColumnsType<DashboardLatestContent> = [
+    { title: '标题', dataIndex: 'title' },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      width: 90,
+      render: (value: DashboardLatestContent['type']) =>
+        contentTypeLabelMap[value] ?? value,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 90,
+      render: (value) => <StatusTag value={value} />,
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updatedAt',
+      width: 160,
+      render: formatDateTime,
+    },
+  ];
+
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
-      <PageSection
-        title="控制台"
-        description="聚合内容、站点和线索数据，让管理员快速了解站点运营状态。"
-      >
-        这里建议接入 `/dashboard/overview`
-        接口，首页只展示最关键的运营概览，避免把控制台做成复杂 BI。
+      <PageSection title="控制台" description="展示内容、服务和线索的核心运营数据。">
+        数据已接入 `/admin/dashboard/overview`。
       </PageSection>
 
-      <Row gutter={[16, 16]}>
-        {stats.map((item) => (
-          <Col span={6} key={item.title}>
-            <Card style={{ borderRadius: 16 }}>
-              <Statistic title={item.title} value={item.value} prefix={item.icon} />
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <Spin spinning={loading}>
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Row gutter={[16, 16]}>
+            {statCards.map((item) => (
+              <Col span={6} key={item.title}>
+                <Card style={{ borderRadius: 16 }}>
+                  <Statistic title={item.title} value={item.value} prefix={item.icon} />
+                </Card>
+              </Col>
+            ))}
+          </Row>
 
-      <Row gutter={[16, 16]}>
-        <Col span={12}>
-          <Card title="最近线索" style={{ borderRadius: 16 }}>
-            <List
-              dataSource={recentLeads}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={`${item.name} / ${item.company}`}
-                    description={`提交时间：${item.createdAt}`}
-                  />
-                  <Tag
-                    color={
-                      item.status === 'pending'
-                        ? 'processing'
-                        : item.status === 'contacted'
-                          ? 'blue'
-                          : 'success'
-                    }
-                  >
-                    {item.status}
-                  </Tag>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="最近发布内容" style={{ borderRadius: 16 }}>
-            <Table
-              size="small"
-              rowKey="id"
-              pagination={false}
-              dataSource={recentContents}
-              columns={[
-                { title: '标题', dataIndex: 'title' },
-                { title: '类型', dataIndex: 'type', width: 90 },
-                { title: '状态', dataIndex: 'status', width: 90 },
-                {
-                  title: '更新时间',
-                  dataIndex: 'updatedAt',
-                  width: 150,
-                  render: formatDateTime,
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <Card title="最新线索" style={{ borderRadius: 16 }}>
+                <List
+                  locale={{
+                    emptyText: (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description="暂无数据"
+                      />
+                    ),
+                  }}
+                  dataSource={overview.latestLeads}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        title={`${item.name} / ${item.company || '-'}`}
+                        description={`提交时间：${formatDateTime(item.createdAt)}`}
+                      />
+                      <Tag color={leadStatusColorMap[item.status]}>
+                        {leadStatusLabelMap[item.status]}
+                      </Tag>
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
+            <Col span={12}>
+              <Card title="最新内容" style={{ borderRadius: 16 }}>
+                <Table
+                  size="small"
+                  rowKey="id"
+                  pagination={false}
+                  dataSource={overview.latestContents}
+                  columns={contentColumns}
+                  locale={{
+                    emptyText: (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description="暂无数据"
+                      />
+                    ),
+                  }}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </Space>
+      </Spin>
     </Space>
   );
 }

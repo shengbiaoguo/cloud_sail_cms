@@ -1,7 +1,7 @@
-import type { LeadStatus, ListResult } from '@/types/common';
+import type { LeadStatus, ListResult, PaginationParams } from '@/types/common';
 
 export interface LeadItem {
-  id: number;
+  id: string | number;
   name: string;
   phone?: string;
   email?: string;
@@ -17,3 +17,8 @@ export interface LeadItem {
 }
 
 export type LeadListResult = ListResult<LeadItem>;
+
+export interface LeadListParams extends PaginationParams {
+  keyword?: string;
+  status?: LeadStatus;
+}

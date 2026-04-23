@@ -26,7 +26,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     try {
-      const currentUser = await authApi.getCurrentUser();
+      const currentUser = await authApi.getCurrentUser({ skipErrorToast: true });
       set({ currentUser, token, initialized: true });
     } catch {
       tokenStorage.clear();
@@ -41,12 +41,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         token: result.accessToken,
         currentUser: result.user,
-        loginLoading: false,
         initialized: true,
       });
-    } catch (error) {
+    } finally {
       set({ loginLoading: false });
-      throw error;
     }
   },
   logout() {

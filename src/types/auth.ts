@@ -7,12 +7,11 @@ export interface LoginPayload {
 
 export interface LoginResult {
   accessToken: string;
-  refreshToken?: string;
   user: CurrentAdminUser;
 }
 
 export interface CurrentAdminUser {
-  id: number;
+  id: string | number;
   username: string;
   nickname: string;
   role: UserRole;

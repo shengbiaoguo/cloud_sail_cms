@@ -1,15 +1,25 @@
 import { Button, Card, Checkbox, Form, Input, Typography } from 'antd';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import type { LoginPayload } from '@/types/auth';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, loginLoading } = useAuthStore();
+  const { login, loginLoading, token } = useAuthStore();
 
-  const handleSubmit = async (values: LoginPayload) => {
-    await login(values);
-    navigate('/dashboard');
+  useEffect(() => {
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate, token]);
+
+  const handleSubmit = (values: LoginPayload) => {
+    return login(values)
+      .then(() => {
+        navigate('/dashboard', { replace: true });
+      })
+      .catch(() => undefined);
   };
 
   return (
@@ -33,10 +43,10 @@ export default function LoginPage() {
           后台登录
         </Typography.Title>
         <Typography.Paragraph type="secondary">
-          用统一账号进入企业官网 CMS 管理后台。
+          使用管理员账号进入企业官网 CMS 管理后台。
         </Typography.Paragraph>
 
-        <Form<LoginPayload> layout="vertical" onFinish={handleSubmit} initialValues={{}}>
+        <Form<LoginPayload> layout="vertical" onFinish={handleSubmit}>
           <Form.Item
             label="账号"
             name="username"
@@ -52,9 +62,9 @@ export default function LoginPage() {
             <Input.Password size="large" placeholder="请输入密码" />
           </Form.Item>
           <Form.Item>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
               <Checkbox>记住登录状态</Checkbox>
-              <Typography.Link>联系超级管理员</Typography.Link>
+              <Typography.Text type="secondary">请输入真实管理员账号</Typography.Text>
             </div>
           </Form.Item>
           <Button

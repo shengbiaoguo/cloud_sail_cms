@@ -1,7 +1,7 @@
-import type { ListResult } from '@/types/common';
+import type { ListResult, PaginationParams } from '@/types/common';
 
 export interface OperationLogItem {
-  id: number;
+  id: string | number;
   adminUserName: string;
   module: string;
   action: string;
@@ -13,3 +13,9 @@ export interface OperationLogItem {
 }
 
 export type OperationLogListResult = ListResult<OperationLogItem>;
+
+export interface OperationLogListParams extends PaginationParams {
+  keyword?: string;
+  module?: string;
+  action?: string;
+}

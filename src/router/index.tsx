@@ -1,25 +1,38 @@
+import { Spin } from 'antd';
+import { Suspense, lazy, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '@/components/layout/app-shell';
 import { AuthGuard, RoleGuard } from '@/components/guards/auth-guard';
-import LoginPage from '@/pages/login';
-import DashboardPage from '@/pages/dashboard';
-import NewsListPage from '@/pages/news';
-import NewsFormPage from '@/pages/news/form';
-import CasesListPage from '@/pages/cases';
-import CaseFormPage from '@/pages/cases/form';
-import ServicesListPage from '@/pages/services';
-import ServiceFormPage from '@/pages/services/form';
-import SiteConfigPage from '@/pages/site-config';
-import LeadsPage from '@/pages/leads';
-import AdminUsersPage from '@/pages/admin-users';
-import UploadsPage from '@/pages/uploads';
-import OperationLogsPage from '@/pages/operation-logs';
-import NotFoundPage from '@/pages/not-found';
+
+const LoginPage = lazy(() => import('@/pages/login'));
+const DashboardPage = lazy(() => import('@/pages/dashboard'));
+const NewsListPage = lazy(() => import('@/pages/news'));
+const NewsFormPage = lazy(() => import('@/pages/news/form'));
+const CasesListPage = lazy(() => import('@/pages/cases'));
+const CaseFormPage = lazy(() => import('@/pages/cases/form'));
+const ServicesListPage = lazy(() => import('@/pages/services'));
+const ServiceFormPage = lazy(() => import('@/pages/services/form'));
+const SiteConfigPage = lazy(() => import('@/pages/site-config'));
+const LeadsPage = lazy(() => import('@/pages/leads'));
+const AdminUsersPage = lazy(() => import('@/pages/admin-users'));
+const UploadsPage = lazy(() => import('@/pages/uploads'));
+const OperationLogsPage = lazy(() => import('@/pages/operation-logs'));
+const NotFoundPage = lazy(() => import('@/pages/not-found'));
+
+const routeLoadingFallback = (
+  <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
+    <Spin />
+  </div>
+);
+
+const withSuspense = (node: ReactNode) => (
+  <Suspense fallback={routeLoadingFallback}>{node}</Suspense>
+);
 
 export const appRouter = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: withSuspense(<LoginPage />),
   },
   {
     element: <AuthGuard />,
@@ -29,27 +42,27 @@ export const appRouter = createBrowserRouter([
         element: <AppShell />,
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
-          { path: 'dashboard', element: <DashboardPage /> },
-          { path: 'news', element: <NewsListPage /> },
-          { path: 'news/create', element: <NewsFormPage /> },
-          { path: 'news/edit/:id', element: <NewsFormPage /> },
-          { path: 'cases', element: <CasesListPage /> },
-          { path: 'cases/create', element: <CaseFormPage /> },
-          { path: 'cases/edit/:id', element: <CaseFormPage /> },
-          { path: 'services', element: <ServicesListPage /> },
-          { path: 'services/create', element: <ServiceFormPage /> },
-          { path: 'services/edit/:id', element: <ServiceFormPage /> },
-          { path: 'site-config', element: <SiteConfigPage /> },
-          { path: 'leads', element: <LeadsPage /> },
-          { path: 'uploads', element: <UploadsPage /> },
+          { path: 'dashboard', element: withSuspense(<DashboardPage />) },
+          { path: 'news', element: withSuspense(<NewsListPage />) },
+          { path: 'news/create', element: withSuspense(<NewsFormPage />) },
+          { path: 'news/edit/:id', element: withSuspense(<NewsFormPage />) },
+          { path: 'cases', element: withSuspense(<CasesListPage />) },
+          { path: 'cases/create', element: withSuspense(<CaseFormPage />) },
+          { path: 'cases/edit/:id', element: withSuspense(<CaseFormPage />) },
+          { path: 'services', element: withSuspense(<ServicesListPage />) },
+          { path: 'services/create', element: withSuspense(<ServiceFormPage />) },
+          { path: 'services/edit/:id', element: withSuspense(<ServiceFormPage />) },
+          { path: 'site-config', element: withSuspense(<SiteConfigPage />) },
+          { path: 'leads', element: withSuspense(<LeadsPage />) },
+          { path: 'uploads', element: withSuspense(<UploadsPage />) },
           {
             element: <RoleGuard roles={['super_admin']} />,
             children: [
-              { path: 'admin-users', element: <AdminUsersPage /> },
-              { path: 'operation-logs', element: <OperationLogsPage /> },
+              { path: 'admin-users', element: withSuspense(<AdminUsersPage />) },
+              { path: 'operation-logs', element: withSuspense(<OperationLogsPage />) },
             ],
           },
-          { path: '*', element: <NotFoundPage /> },
+          { path: '*', element: withSuspense(<NotFoundPage />) },
         ],
       },
     ],

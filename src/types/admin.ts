@@ -1,7 +1,7 @@
-import type { ListResult, UserRole, UserStatus } from '@/types/common';
+import type { ListResult, PaginationParams, UserRole, UserStatus } from '@/types/common';
 
 export interface AdminUserItem {
-  id: number;
+  id: string | number;
   username: string;
   nickname: string;
   role: UserRole;
@@ -11,3 +11,9 @@ export interface AdminUserItem {
 }
 
 export type AdminUserListResult = ListResult<AdminUserItem>;
+
+export interface AdminUserListParams extends PaginationParams {
+  keyword?: string;
+  role?: UserRole;
+  status?: UserStatus;
+}

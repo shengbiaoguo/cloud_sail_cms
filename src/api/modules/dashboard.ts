@@ -1,8 +1,11 @@
-import type { DashboardStats } from '@/types/dashboard';
+import type { DashboardOverview } from '@/types/dashboard';
 import { request } from '@/utils/request';
 
 export const dashboardApi = {
+  getOverview() {
+    return request.get<never, DashboardOverview>('/admin/dashboard/overview');
+  },
   getStats() {
-    return request.get<never, DashboardStats>('/dashboard/overview');
+    return this.getOverview();
   },
 };

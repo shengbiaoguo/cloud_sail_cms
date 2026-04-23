@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import '@ant-design/v5-patch-for-react-19';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { RouterProvider } from 'react-router-dom';
+import { AppFeedbackProvider } from '@/components/providers/app-feedback-provider';
 import { appRouter } from '@/router';
 import '@/styles/global.css';
 
@@ -19,7 +21,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         },
       }}
     >
-      <RouterProvider router={appRouter} />
+      <AppFeedbackProvider>
+        <RouterProvider router={appRouter} />
+      </AppFeedbackProvider>
     </ConfigProvider>
   </React.StrictMode>,
 );

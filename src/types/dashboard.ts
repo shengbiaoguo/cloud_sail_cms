@@ -1,11 +1,32 @@
-import type { CaseStudyItem, NewsItem, ServiceItem } from '@/types/content';
-import type { LeadItem } from '@/types/lead';
+import type { EntityStatus, LeadStatus } from '@/types/common';
 
-export interface DashboardStats {
+export interface DashboardOverviewStats {
   newsCount: number;
-  caseCount: number;
+  caseStudyCount: number;
   serviceCount: number;
   leadCount: number;
-  recentLeads: LeadItem[];
-  recentContents: Array<NewsItem | CaseStudyItem | ServiceItem>;
+}
+
+export interface DashboardLatestLead {
+  id: string;
+  name: string;
+  company?: string;
+  status: LeadStatus;
+  createdAt: string;
+}
+
+export type DashboardContentType = 'news' | 'case' | 'service';
+
+export interface DashboardLatestContent {
+  id: string;
+  title: string;
+  type: DashboardContentType;
+  status: EntityStatus;
+  updatedAt: string;
+}
+
+export interface DashboardOverview {
+  stats: DashboardOverviewStats;
+  latestLeads: DashboardLatestLead[];
+  latestContents: DashboardLatestContent[];
 }

@@ -116,7 +116,7 @@ export function AppShell() {
           >
             <Space style={{ cursor: 'pointer' }}>
               <Avatar>{currentUser?.nickname?.slice(0, 1) ?? 'A'}</Avatar>
-              <div>
+              <div style={{ lineHeight: 'normal' }}>
                 <Typography.Text strong>{currentUser?.nickname ?? '-'}</Typography.Text>
                 <div style={{ fontSize: 12, color: '#64748b' }}>
                   {currentUser?.role === 'super_admin' ? '超级管理员' : '编辑'}
