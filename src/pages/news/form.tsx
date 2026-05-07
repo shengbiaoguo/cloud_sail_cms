@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { newsApi } from '@/api/modules/news';
 import { PageSection } from '@/components/common/page-section';
+import { RichTextEditor } from '@/components/common/rich-text-editor';
 import { UploadField } from '@/components/common/upload-field';
 import { contentStatusOptions, newsCategoryOptions } from '@/constants/enums';
 import type { EntityStatus } from '@/types/common';
@@ -76,7 +77,7 @@ export default function NewsFormPage() {
       tags: values.tags?.map((item) => item.trim()).filter(Boolean) || undefined,
       summary: values.summary.trim(),
       coverImage: values.coverImage?.trim() || undefined,
-      content: values.content.trim(),
+      content: values.content,
       seoTitle: values.seoTitle?.trim() || undefined,
       seoKeywords: values.seoKeywords?.trim() || undefined,
       seoDescription: values.seoDescription?.trim() || undefined,
@@ -229,7 +230,7 @@ export default function NewsFormPage() {
             rules={[{ required: true, message: '请输入新闻正文' }]}
             style={{ marginBottom: 0 }}
           >
-            <Input.TextArea rows={14} placeholder="请输入新闻正文内容" />
+            <RichTextEditor placeholder="请输入新闻正文内容，支持标题、列表、链接与基础排版" />
           </Form.Item>
         </Card>
 

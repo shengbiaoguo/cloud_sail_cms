@@ -324,10 +324,14 @@ export default function NewsListPage() {
                 {
                   key: 'content',
                   label: '正文',
-                  children: (
-                    <Typography.Paragraph style={{ whiteSpace: 'pre-wrap' }}>
-                      {activeItem.content || '-'}
-                    </Typography.Paragraph>
+                  children: activeItem.content ? (
+                    <div
+                      className="rich-text-content"
+                      style={{ lineHeight: 1.8 }}
+                      dangerouslySetInnerHTML={{ __html: activeItem.content }}
+                    />
+                  ) : (
+                    '-'
                   ),
                 },
               ]}
