@@ -1,4 +1,4 @@
-import {
+﻿import {
   Button,
   Descriptions,
   Drawer,
@@ -17,8 +17,12 @@ import { useNavigate } from 'react-router-dom';
 import { newsApi } from '@/api/modules/news';
 import { PageSection } from '@/components/common/page-section';
 import { StatusTag } from '@/components/common/status-tag';
-import { contentStatusOptions } from '@/constants/enums';
-import type { NewsItem, NewsListParams } from '@/types/content';
+import {
+  CATEGORY_LABEL_MAP,
+  contentStatusOptions,
+  newsCategoryOptions,
+} from '@/constants/enums';
+import type { NewsCategoryValue, NewsItem, NewsListParams } from '@/types/content';
 import { formatDateTime } from '@/utils/format';
 import { showSuccessMessage } from '@/utils/feedback';
 
@@ -58,6 +62,7 @@ export default function NewsListPage() {
       pageSize: pagination.pageSize,
       keyword: values.keyword?.trim() || undefined,
       status: values.status,
+      category: values.category,
     });
   };
 
@@ -109,14 +114,33 @@ export default function NewsListPage() {
     {
       title: '标题',
       dataIndex: 'title',
-      render: (value: string, record) => (
+      render: (value: string) => (
         <div>
           <Typography.Text strong>{value}</Typography.Text>
-          <div style={{ marginTop: 4, color: '#64748b' }}>{record.summary}</div>
         </div>
       ),
     },
-    { title: 'Slug', dataIndex: 'slug', width: 220 },
+    {
+      title: '分类',
+      dataIndex: 'category',
+      width: 120,
+      render: (value: NewsCategoryValue) => CATEGORY_LABEL_MAP[value] ?? value,
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      width: 180,
+      render: (value?: string[]) =>
+        value?.length ? (
+          <Space size={[4, 4]} wrap>
+            {value.map((item) => (
+              <Tag key={item}>{item}</Tag>
+            ))}
+          </Space>
+        ) : (
+          '-'
+        ),
+    },
     {
       title: '状态',
       dataIndex: 'status',
@@ -125,12 +149,6 @@ export default function NewsListPage() {
     },
     { title: '排序', dataIndex: 'sortOrder', width: 90 },
     { title: '发布时间', dataIndex: 'publishedAt', width: 170, render: formatDateTime },
-    {
-      title: '更新人',
-      dataIndex: 'updatedByName',
-      width: 120,
-      render: (value?: string) => value ?? '-',
-    },
     { title: '更新时间', dataIndex: 'updatedAt', width: 170, render: formatDateTime },
     {
       title: '操作',
@@ -180,13 +198,22 @@ export default function NewsListPage() {
 
       <div className="page-card">
         <Form form={form} layout="vertical" onFinish={handleSearch}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr auto', gap: 16 }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: 16 }}
+          >
             <Form.Item<NewsListParams>
               label="关键词"
               name="keyword"
               style={{ marginBottom: 0 }}
             >
               <Input allowClear placeholder="请输入标题、Slug 或摘要关键词" />
+            </Form.Item>
+            <Form.Item<NewsListParams>
+              label="分类"
+              name="category"
+              style={{ marginBottom: 0 }}
+            >
+              <Select allowClear placeholder="全部分类" options={newsCategoryOptions} />
             </Form.Item>
             <Form.Item<NewsListParams>
               label="状态"
@@ -250,6 +277,17 @@ export default function NewsListPage() {
               column={1}
               items={[
                 { key: 'summary', label: '摘要', children: activeItem.summary || '-' },
+                {
+                  key: 'category',
+                  label: '分类',
+                  children:
+                    CATEGORY_LABEL_MAP[activeItem.category] ?? activeItem.category,
+                },
+                {
+                  key: 'tags',
+                  label: '标签',
+                  children: activeItem.tags?.length ? activeItem.tags.join('、') : '-',
+                },
                 {
                   key: 'publishedAt',
                   label: '发布时间',

@@ -1,4 +1,4 @@
-import { Button, Card, Col, DatePicker, Form, Input, Row, Select, Space } from 'antd';
+﻿import { Button, Card, Col, DatePicker, Form, Input, Row, Select, Space } from 'antd';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { newsApi } from '@/api/modules/news';
 import { PageSection } from '@/components/common/page-section';
 import { UploadField } from '@/components/common/upload-field';
-import { contentStatusOptions } from '@/constants/enums';
+import { contentStatusOptions, newsCategoryOptions } from '@/constants/enums';
 import type { EntityStatus } from '@/types/common';
 import type { NewsFormPayload } from '@/types/content';
 import { showSuccessMessage } from '@/utils/feedback';
@@ -32,6 +32,7 @@ export default function NewsFormPage() {
     if (!id) {
       form.setFieldsValue({
         status: 'draft',
+        category: 'industry_news',
         sortOrder: 1,
       });
       return;
@@ -44,6 +45,8 @@ export default function NewsFormPage() {
         form.setFieldsValue({
           title: detail.title,
           slug: detail.slug,
+          category: detail.category,
+          tags: detail.tags || undefined,
           summary: detail.summary,
           coverImage: detail.coverImage,
           content: detail.content,
@@ -69,6 +72,8 @@ export default function NewsFormPage() {
     const payload: NewsFormPayload = {
       title: values.title.trim(),
       slug: values.slug.trim(),
+      category: values.category,
+      tags: values.tags?.map((item) => item.trim()).filter(Boolean) || undefined,
       summary: values.summary.trim(),
       coverImage: values.coverImage?.trim() || undefined,
       content: values.content.trim(),
@@ -141,6 +146,24 @@ export default function NewsFormPage() {
                 ]}
               >
                 <Input placeholder="例如 official-site-relaunch" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="分类"
+                name="category"
+                rules={[{ required: true, message: '请选择分类' }]}
+              >
+                <Select options={newsCategoryOptions} placeholder="请选择分类" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="标签" name="tags">
+                <Select
+                  mode="tags"
+                  tokenSeparators={[',', '，']}
+                  placeholder="输入后回车，或用逗号分隔多个标签"
+                />
               </Form.Item>
             </Col>
             <Col span={24}>

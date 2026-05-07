@@ -1,4 +1,11 @@
-import type { EntityStatus, ListResult, PaginationParams } from '@/types/common';
+﻿import type { EntityStatus, ListResult, PaginationParams } from '@/types/common';
+
+export type NewsCategoryValue =
+  | 'industry_news'
+  | 'writing_tips'
+  | 'journal_submission'
+  | 'academic_service'
+  | 'research_integrity';
 
 export interface BaseContentEntity {
   id: string | number;
@@ -19,7 +26,10 @@ export interface BaseContentEntity {
   updatedByName?: string;
 }
 
-export type NewsItem = BaseContentEntity;
+export interface NewsItem extends BaseContentEntity {
+  category: NewsCategoryValue;
+  tags?: string[];
+}
 
 export interface CaseStudyItem extends BaseContentEntity {
   clientName?: string;
@@ -36,11 +46,15 @@ export interface ContentListParams extends PaginationParams {
   status?: EntityStatus;
 }
 
-export type NewsListParams = ContentListParams;
+export interface NewsListParams extends ContentListParams {
+  category?: NewsCategoryValue;
+}
 
 export interface NewsFormPayload {
   title: string;
   slug: string;
+  category: NewsCategoryValue;
+  tags?: string[];
   summary: string;
   coverImage?: string;
   content: string;

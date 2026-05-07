@@ -16,6 +16,7 @@ export const newsApi = {
         ...buildPageParams(params),
         keyword: params?.keyword,
         status: params?.status,
+        category: params?.category,
       },
       ...config,
     });
