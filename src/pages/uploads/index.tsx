@@ -91,7 +91,7 @@ export default function UploadsPage() {
     },
     {
       title: '上传人',
-      dataIndex: 'uploadedBy',
+      dataIndex: 'uploadedByName',
       width: 120,
       render: (value?: string) => value ?? '-',
     },

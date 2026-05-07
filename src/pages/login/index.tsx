@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import type { LoginPayload } from '@/types/auth';
 
+interface LoginFormValues extends LoginPayload {
+  remember?: boolean;
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, loginLoading, token } = useAuthStore();
@@ -14,8 +18,9 @@ export default function LoginPage() {
     }
   }, [navigate, token]);
 
-  const handleSubmit = (values: LoginPayload) => {
-    return login(values)
+  const handleSubmit = (values: LoginFormValues) => {
+    const { remember = false, ...payload } = values;
+    return login(payload, remember)
       .then(() => {
         navigate('/dashboard', { replace: true });
       })
@@ -46,7 +51,11 @@ export default function LoginPage() {
           使用管理员账号进入企业官网 CMS 管理后台。
         </Typography.Paragraph>
 
-        <Form<LoginPayload> layout="vertical" onFinish={handleSubmit}>
+        <Form<LoginFormValues>
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ remember: false }}
+        >
           <Form.Item
             label="账号"
             name="username"
@@ -63,7 +72,9 @@ export default function LoginPage() {
           </Form.Item>
           <Form.Item>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-              <Checkbox>记住登录状态</Checkbox>
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox>记住登录状态</Checkbox>
+              </Form.Item>
               <Typography.Text type="secondary">请输入真实管理员账号</Typography.Text>
             </div>
           </Form.Item>

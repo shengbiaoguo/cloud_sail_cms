@@ -9,7 +9,7 @@ interface AuthState {
   initialized: boolean;
   loginLoading: boolean;
   bootstrap: () => Promise<void>;
-  login: (payload: LoginPayload) => Promise<void>;
+  login: (payload: LoginPayload, remember?: boolean) => Promise<void>;
   logout: () => void;
 }
 
@@ -33,11 +33,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ currentUser: null, token: null, initialized: true });
     }
   },
-  async login(payload) {
+  async login(payload, remember = true) {
     set({ loginLoading: true });
     try {
       const result = await authApi.login(payload);
-      tokenStorage.set(result.accessToken);
+      tokenStorage.set(result.accessToken, remember);
       set({
         token: result.accessToken,
         currentUser: result.user,
